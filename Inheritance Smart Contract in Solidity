@@ -1,0 +1,41 @@
+pragma solidity ^0.6.2;
+
+contract Inheritance {
+address Owner;
+bool Deceased;
+uint Money;
+
+constructor() public payable {
+Owner = msg.sender;
+Money = msg.value;
+Deceased = false;
+}
+
+modifier oneOwner {
+require (msg.sender == Owner);
+_;
+}
+
+modifier isDeceased {
+require (Deceased == true);
+_;
+}
+
+address payable[] wallets;
+mapping (address => uint) inheritance;
+
+function Setup (address payable _wallet, uint _inheritance) public oneOwner {
+wallets.push (_wallet);
+inheritance [_wallet] = _inheritance;
+}
+
+function MoneyPaid() private isDeceased {
+for (uint i=0; i<wallets.length; i++) {
+wallets[i].transfer (inheritance[wallets[i]]);
+}
+}
+
+function Died() public oneOwner {
+Deceased = true;
+MoneyPaid();
+}
